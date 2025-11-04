@@ -109,12 +109,15 @@ phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 }
 #endif
 
-#ifndef ARCH_HAS_VALID_PHYS_ADDR_RANGE
 static inline int my_valid_phys_addr_range(phys_addr_t addr, size_t count)
 {
-	return addr + count <= __pa(high_memory);
+	if (count == 0)
+        return 1;
+    if (addr + (phys_addr_t)count < addr)  // 补充溢出检查，更健壮
+        return 0;
+    return addr + count <= __pa(high_memory);
 }
-#endif
+
 
 bool read_physical_address(phys_addr_t pa, void *buffer, size_t size)
 {
