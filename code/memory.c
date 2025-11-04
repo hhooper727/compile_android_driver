@@ -65,12 +65,8 @@ phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 }
 #endif
 
-/* NOTE:
- * The implementation of valid_phys_addr_range has been moved to memory.h
- * as static inline under the ARCH_HAS_VALID_PHYS_ADDR_RANGE guard.
- * Do NOT provide another global definition here to avoid duplicate symbols.
- */
 
+/*
 bool read_physical_address(phys_addr_t pa, void *buffer, size_t size)
 {
     void *mapped;
@@ -122,5 +118,5 @@ bool write_physical_address(phys_addr_t pa, void *buffer, size_t size)
     iounmap(mapped);
     return true;
 }
+*/
 
-/* 其余函数保持不变 */
