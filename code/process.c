@@ -65,3 +65,4 @@ uintptr_t get_module_base(pid_t pid, char *name)
 	mmput(mm);
 	return base_addr;
 }
+MODULE_LICENSE("GPL");
