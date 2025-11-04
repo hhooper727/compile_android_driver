@@ -258,4 +258,3 @@ bool write_process_memory(
 	mmput(mm);
 	return result;
 }
-MODULE_LICENSE("GPL");
