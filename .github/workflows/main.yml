@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir -p android-kernel && cd android-kernel
           repo init -u https://android.googlesource.com/kernel/manifest -b common-android${{ github.event.inputs.android_version }}-${{ github.event.inputs.kernel_version }}
-          repo sync -j$(nproc) -c --no-tags --optimized-fetch --force-sync
+          repo sync -j$(nproc) -c --no-tags --optimized-fetch --force-sync --depth=1
 
       - name: Copy kerneldriver
         run: |
