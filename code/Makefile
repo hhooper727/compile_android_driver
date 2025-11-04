@@ -1,2 +1,2 @@
-obj-m += entry.o
-entry-objs += memory.o process.o
+obj-m := entry.o
+entry-objs := memory.o process.o
