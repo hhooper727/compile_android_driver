@@ -2,12 +2,15 @@
 #define KERNELDRIVER_MEMORY_H
 
 #include <linux/kernel.h>
+#include <linux/types.h>
+#include <linux/pid.h>
 #include <linux/sched.h>
 #include <linux/mm.h> /* for high_memory, phys_addr_t */
 #include <linux/uaccess.h>
 #include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/version.h>
+
 
 phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va);
 bool read_physical_address(phys_addr_t pa, void *buffer, size_t size);
