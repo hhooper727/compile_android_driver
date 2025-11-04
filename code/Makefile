@@ -1,2 +1,2 @@
-obj-m := entry.o
-entry-objs := memory.o process.o
+obj-m := wx.o
+wx-objs := entry.o memory.o process.o
