@@ -104,15 +104,19 @@ jobs:
       - name: Build kernel module
         run: |
           cd android-kernel
-          if [ ${{ github.event.inputs.android_version }} -le 13 ]; then
-            BUILD_CONFIG=common/build.config.gki.${{ github.event.inputs.target_arch }} LTO=thin build/build.sh -j32
-            OUTPUT_PATH="out/android${{ github.event.inputs.android_version }}-${{ github.event.inputs.kernel_version }}/dist"
+          make O=out ARCH=arm64 common/defconfig
+          make O=out ARCH=arm64 modules_prepare
+          make -C . O=out ARCH=arm64 M=common/drivers/kerneldriver modules -j$(nproc)
+          MODULE_NAME="${{ github.event.inputs.driver_name % .ko }}"
+          MOD_PATH="out/common/drivers/kerneldriver/${MODULE_NAME}.ko"
+          if [ -f "$MOD_PATH" ]; then
+            echo "✅ Module compiled successfully!"
+            mkdir -p output_dist
+            cp "$MOD_PATH" output_dist/
+            echo "OUTPUT_PATH=output_dist" >> $GITHUB_ENV
           else
-            echo "Using Bazel build system for Android ${{ github.event.inputs.android_version }}"
-            tools/bazel run //common:kernel_${{ github.event.inputs.target_arch }}_dist
-            OUTPUT_PATH="out/kernel_${{ github.event.inputs.target_arch }}"
-          fi
-          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
+            echo "❌ ERROR: Module not found"
+            exit 1
         continue-on-error: true
       
       - name: Upload artifacts
