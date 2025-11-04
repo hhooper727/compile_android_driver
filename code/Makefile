@@ -1,2 +1,3 @@
-obj-m := wx.o
-wx-objs := entry.o memory.o process.o
+﻿obj-m += entry.o  
+entry-objs := memory.o process.o
+EXTRA_CFLAGS += -O2 -g0 -DNDEBUG
