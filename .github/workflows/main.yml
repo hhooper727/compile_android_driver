@@ -101,23 +101,35 @@ jobs:
           done
           sed -i '/EXPORT_SYMBOL(unregister_kprobe);/a EXPORT_SYMBOL(register_kprobe);' common/kernel/kprobes.c
           
-      - name: Build kernel module
+      - name: Build kernel module only (fast compilation)
         run: |
           cd android-kernel
-          if [ ${{ github.event.inputs.android_version }} -le 13 ]; then
-            BUILD_CONFIG=common/build.config.gki.${{ github.event.inputs.target_arch }} LTO=thin build/build.sh -j32
-            OUTPUT_PATH="out/android${{ github.event.inputs.android_version }}-${{ github.event.inputs.kernel_version }}/dist"
+          make O=out ARCH=arm64 common/defconfig
+          make O=out ARCH=arm64 modules_prepare
+          make -C . O=out ARCH=arm64 M=common/drivers/kerneldriver modules -j$(nproc)
+          MODULE_NAME="${{ github.event.inputs.driver_name % .ko }}"
+          MOD_PATH="out/common/drivers/kerneldriver/${MODULE_NAME}.ko"
+          if [ -f "$MOD_PATH" ]; then
+            echo "✅ Module compiled successfully!"
+            echo "Module: $MOD_PATH"
+            ls -la "$MOD_PATH"  
+            echo "Module info:"
+            modinfo "$MOD_PATH"
+            echo "Module size: $(stat -c%s "$MOD_PATH") bytes"
+            mkdir -p output_dist
+            cp "$MOD_PATH" output_dist/
           else
-            echo "Using Bazel build system for Android ${{ github.event.inputs.android_version }}"
-            tools/bazel run //common:kernel_${{ github.event.inputs.target_arch }}_dist
-            OUTPUT_PATH="out/kernel_${{ github.event.inputs.target_arch }}"
+            echo "❌ ERROR: Module not found at $MOD_PATH"
+            echo "Checking available files in build directory:"
+            find out/common/drivers/kerneldriver/ -name "*.ko" -ls
+            echo "Listing all files in kerneldriver directory:"
+            ls -la out/common/drivers/kerneldriver/
+            exit 1
           fi
-          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
-        continue-on-error: true
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
           name: kernel-driver-${{ github.event.inputs.target_arch }}
           path: |
-            android-kernel/${{ env.OUTPUT_PATH }}
+            android-kernel/output_dist/${{ env.OUTPUT_PATH }}
