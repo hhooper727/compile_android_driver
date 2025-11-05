@@ -20,11 +20,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+   
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
-        
+   
+      - name: Check disk space
+        run: |
+          pwd
+          df -h
+          free -h
+          rm -rf /home/runner/_work/*
       - name: Prepare kerneldriver directory
         run: |
           mkdir kerneldriver
