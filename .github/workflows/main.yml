@@ -107,9 +107,6 @@ jobs:
           if [ ${{ github.event.inputs.android_version }} -le 13 ]; then
             BUILD_CONFIG=common/build.config.gki.${{ github.event.inputs.target_arch }} LTO=thin build/build.sh -j32
             OUTPUT_PATH="out/android${{ github.event.inputs.android_version }}-${{ github.event.inputs.kernel_version }}/dist"
-            OUT_BASE="out/android${{ github.event.inputs.android_version }}-${{ github.event.inputs.kernel_version }}"
-            MODULES_ORDER_FILE="$OUT_BASE/common/modules.order
-            sed 's/\.ko$//' "$MODULES_ORDER_FILE" > "$GKI_MODULES_LIST"
           else
             echo "Using Bazel build system for Android ${{ github.event.inputs.android_version }}"
             tools/bazel run //common:kernel_${{ github.event.inputs.target_arch }}_dist
