@@ -5,7 +5,7 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 #include <linux/version.h>
-
+#include <linux/memblock.h>
 #include <asm/cpu.h>
 #include <asm/io.h>
 #include <asm/page.h>
@@ -65,6 +65,7 @@ phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 	return page_addr + page_offset;
 }
 #else
+
 phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 {
 
@@ -112,12 +113,16 @@ phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 static inline int my_valid_phys_addr_range(phys_addr_t addr, size_t count)
 {
 	if (count == 0)
-        return 1;
-    if (addr + (phys_addr_t)count < addr)  // 补充溢出检查，更健壮
-        return 0;
-    return addr + count <= __pa(high_memory);
+	{
+		return 1;
+	}
+	if (addr + (phys_addr_t)count < addr)
+	{
+		return 0;
+	}
+	//return addr + count <= __pa(high_memory);
+	return addr + count <= memblock_end_of_DRAM();
 }
-
 
 bool read_physical_address(phys_addr_t pa, void *buffer, size_t size)
 {
@@ -131,7 +136,8 @@ bool read_physical_address(phys_addr_t pa, void *buffer, size_t size)
 	{
 		return false;
 	}
-	mapped = ioremap_cache(pa, size);
+	//mapped = ioremap_cache(pa, size);
+	mapped = ioremap(pa, size);
 	if (!mapped)
 	{
 		return false;
@@ -157,7 +163,8 @@ bool write_physical_address(phys_addr_t pa, void *buffer, size_t size)
 	{
 		return false;
 	}
-	mapped = ioremap_cache(pa, size);
+	//mapped = ioremap_cache(pa, size);
+	mapped = ioremap(pa, size);
 	if (!mapped)
 	{
 		return false;
